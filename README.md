@@ -434,3 +434,260 @@ CS50 es un curso introductorio de Ciencias de la Computación que enseña los fu
 El objetivo de este manual no es reemplazar el contenido del curso, sino documentar mi proceso de aprendizaje con mis propias palabras, complementándolo con ejemplos, explicaciones y notas personales que me ayuden a comprender mejor cada tema.
 
 🔗 Curso oficial de CS50: https://cs50.harvard.edu/x/
+
+
+CS50x – Semana 1
+Introducción al lenguaje C
+
+¿Qué es un lenguaje de programación?
+Un lenguaje de programación es un idioma que utilizamos para comunicarnos con la computadora.
+Nos permite escribir instrucciones que la computadora ejecutará para realizar una determinada tarea.
+En la Semana 1 comenzamos a trabajar con C, uno de los lenguajes de programación más importantes e influyentes de la historia.
+
+Código fuente (Source Code)
+
+El código que escribimos los programadores se llama código fuente.
+Está pensado para que los humanos podamos leerlo, escribirlo y entenderlo.
+
+Ejemplo:
+
+printf("¡Hermosa mañana, ¿verdad?\n");
+
+Código máquina (Machine Code)
+
+La computadora no entiende lenguaje C.
+Solo entiende instrucciones representadas mediante 0 y 1, llamadas código máquina.
+Por eso necesitamos traducir nuestro programa antes de ejecutarlo.
+
+¿Qué es un compilador?
+
+Un compilador es un programa que traduce el código fuente escrito por el programador a código máquina.
+Es el intermediario entre nuestro lenguaje y el lenguaje que entiende la computadora.
+Sin un compilador, la computadora no podría ejecutar un programa escrito en C.
+
+¿Qué significa compilar?
+
+Compilar significa traducir el código fuente a código máquina.
+Durante ese proceso, el compilador también verifica que el programa no tenga errores de sintaxis.
+Si encuentra un error, detiene la compilación e informa qué ocurrió.
+Si todo está correcto, genera un archivo ejecutable.
+
+Proceso completo
+
+Programador
+      ↓
+Escribe código fuente (C)
+      ↓
+Compilador
+      ↓
+Traduce a código máquina (0 y 1)
+      ↓
+Genera un programa ejecutable
+      ↓
+Computadora ejecuta el programa
+
+En CS50 normalmente utilizaremos:
+make hello
+Este comando compila el programa.
+Luego:
+./hello
+Ejecuta el archivo compilado.
+
+Nota personal: El comando ./ significa "ejecutá el programa que está en la carpeta actual"
+
+Esta semana utilizaremos el programa VSC (Visual Studio Code)
+
+VS Code será nuestro entorno de desarrollo durante el curso.
+Con él podremos:
+escribir programas;
+editar archivos;
+compilar código;
+ejecutar programas;
+corregir errores.
+Además, VS Code resalta automáticamente la sintaxis utilizando distintos colores, lo que facilita la lectura del código.
+
+GUI (Graphical User Interface)
+Es la Interfaz Gráfica de Usuario.
+Utilizamos ventanas, botones, carpetas e íconos para interactuar con la computadora.
+Ejemplo:
+abrir un archivo haciendo doble clic.
+
+CLI (Command Line Interface)
+Es la Interfaz de Línea de Comandos.
+Aquí escribimos órdenes directamente para que la computadora las ejecute.
+Ejemplos:
+make hello
+./hello
+
+En programación se utiliza muchísimo porque brinda mayor control y velocidad que una interfaz gráfica.
+
+La sintaxis
+
+Cada lenguaje de programación tiene reglas propias.
+A esas reglas las llamamos sintaxis.
+Es el equivalente a la gramática de un idioma.
+Si la sintaxis es incorrecta, el programa no podrá compilar.
+Errores frecuentes:
+olvidar un punto y coma;
+escribir mal una función;
+olvidar una llave.
+
+Mi primer programa en C
+
+Tradicionalmente, el primer programa imprime el mensaje "Hello, world!".
+Es una tradición histórica utilizada para comprobar que el compilador y el entorno funcionan correctamente.
+En este manual decidí personalizar ese ejemplo con una frase muy conocida en Argentina.
+
+#include <stdio.h>
+
+int main(void)
+{
+    printf("¡Hermosa mañana, ¿verdad?\n");
+}
+
+El funcionamiento es exactamente el mismo.
+Simplemente cambiamos el texto que se imprime.
+
+Analizando el programa
+
+#include <stdio.h>
+
+Incluye la biblioteca estándar de entrada y salida.
+Gracias a ella podemos utilizar funciones como:
+printf()
+
+int main(void)
+
+Es la función principal del programa.
+Todo programa en C comienza ejecutándose aquí.
+
+printf()
+
+Es una función que imprime texto en pantalla.
+En nuestro ejemplo imprime:
+¡Hermosa mañana, ¿verdad?
+
+;
+
+El punto y coma indica el final de una instrucción.
+En C casi todas las instrucciones terminan con ;
+
+Secuencias de escape
+
+Son caracteres especiales que modifican la salida del texto.
+
+\n
+Nueva línea.
+printf("¡Hermosa mañana, ¿verdad?\n");
+Después de imprimir el mensaje, el cursor baja a la línea siguiente.
+
+\r
+Retorno de carro.
+Hace que el cursor vuelva al comienzo de la línea.
+Me gusta imaginarlo como el movimiento del cabezal al leer una secuencia de ADN: vuelve al inicio para comenzar nuevamente. (direccion  5' ◀────────────── 3' )
+
+\"
+Permite imprimir comillas dobles dentro del texto.
+
+\\
+Permite imprimir una barra invertida.
+
+Los errores
+
+Cuando escribimos un programa incorrectamente, el compilador informa el problema.
+Por ejemplo:
+falta un punto y coma;
+falta un #include;
+escribimos mal una función.
+VS Code muestra:
+la línea donde ocurrió el error;
+el tipo de error;
+una explicación para ayudarnos a corregirlo.
+Aprender a interpretar estos mensajes será una habilidad fundamental.
+
+Bibliotecas
+
+No hace falta escribir todas las funciones desde cero.
+Muchas ya fueron desarrolladas por otros programadores.
+Ese conjunto de funciones forma parte de una biblioteca.
+Para utilizarlas debemos incluir el archivo correspondiente.
+Ejemplo:
+
+#include <stdio.h>
+
+Archivos cabecera (.h)
+
+Los archivos que terminan en .h se llaman Header Files o Archivos Cabecera.
+Contienen las declaraciones necesarias para utilizar funciones ya existentes.
+Por ejemplo:
+
+stdio.h
+
+Nos permite utilizar printf()
+
+Documentación (Manual cs50)
+
+Cuando no sabemos cómo funciona una función, podemos consultar la documentación.
+CS50 utiliza las Manual Pages (man pages).
+En ellas podemos encontrar:
+qué hace una función;
+cómo se escribe;
+qué parámetros recibe;
+qué valor devuelve.
+A medida que avancemos en el curso iremos consultando estas páginas con frecuencia.
+
+Ejemplo: get_string()
+
+Uno de los primeros ejemplos que presenta CS50 es la función get_string().
+Esta función pertenece a la biblioteca de CS50 y permite solicitar al usuario que escriba un texto.
+Ese texto se almacena en una variable de tipo string.
+
+Por ejemplo:
+
+string nombre = get_string("¿Cómo te llamás? ");
+
+En este caso:
+string indica que la variable almacenará texto.
+get_string() solicita ese texto al usuario.
+El valor ingresado queda guardado en la variable nombre.
+
+Entrada → Proceso → Salida
+Todo programa sigue el mismo esquema.
+
+Input
+Información que recibe el programa.
+
+Ejemplo: como te llamas?
+
+Procesamiento
+El programa utiliza esa información para realizar una tarea.
+
+Output
+Devuelve un resultado.
+
+Ejemplo: Hola, Mailen
+
+Importante: get_string() es solo uno de los muchos comandos y funciones que encontraremos en las Manual Pages de CS50. A medida que avancemos en el curso iremos incorporando nuevas funciones y nuevos tipos de datos.
+
+Comparación con Scratch
+En Scratch hacíamos:
+
+Preguntar
+
+↓
+
+Esperar respuesta
+
+↓
+
+Unir "Hola"
+
+↓
+
+Mostrar
+
+En C hacemos exactamente lo mismo escribiendo:
+
+string answer = get_string("Como te llamas? ");
+
+printf("Hola, %s\n", answer);
