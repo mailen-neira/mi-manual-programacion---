@@ -8751,3 +8751,719 @@ Todo lo que viene a continuación se construirá sobre estos conceptos.
 ✅ Organizar programas utilizando prototipos.
 
 ---
+
+
+# Semana 2 — Herramientas para escribir mejor código
+
+Ya terminaste la primera parte del libro. Sabés declarar variables, tomar decisiones, repetir instrucciones y organizar tu programa en funciones.
+
+Pero hasta ahora escribiste programas cortos, con pocas variables, y probablemente nunca se rompieron de una forma que no pudieras entender de un vistazo.
+
+Eso está por cambiar.
+
+A medida que un programa crece, aparecen dos problemas nuevos:
+
+1. El código empieza a fallar de maneras que no son obvias.
+2. Necesitás guardar muchos datos parecidos (notas, nombres, letras de una palabra) sin escribir una variable para cada uno.
+
+Esta semana vas a resolver ambos problemas. Primero vas a aprender a **encontrar errores** en tu código. Después vas a entender **qué hace la computadora con tu código** antes de ejecutarlo. Y con eso resuelto, vas a conocer una herramienta que te va a acompañar el resto del libro: los **arreglos**, y su caso más común, las **cadenas de texto**.
+
+---
+
+# Capítulo 1 — Depurar código
+
+## ¿Qué problema resuelve?
+
+Todo el mundo que programa comete errores. No es una excepción, es la regla. El problema real no es cometer errores, sino no tener un método para encontrarlos.
+
+A ese proceso de encontrar y corregir errores se lo llama **depurar** (en inglés, *debug*). Y un error en el código se llama, justamente, **bug**.
+
+## Idea clave
+
+Hay dos tipos de errores muy distintos:
+
+- **Errores que la computadora te avisa**: el compilador se queja y no te deja ejecutar el programa.
+- **Errores silenciosos**: el programa corre sin quejarse, pero el resultado no es el que esperabas. A estos se los llama **errores lógicos**, y son los más difíciles de encontrar, porque nadie te avisa que existen.
+
+## Errores que sí te avisan
+
+Mirá este programa:
+
+```c
+int main(void)
+{
+    printf("hello, world\n");
+}
+```
+
+Si lo compilás, va a fallar. Falta una línea:
+
+```c
+#include <stdio.h>
+```
+
+Sin ese `#include`, el compilador no sabe qué es `printf`.
+
+Ahora mirá este otro:
+
+```c
+#include <studio.h>
+
+int main(void)
+{
+    printf("hello, world\n");
+}
+```
+
+Este también falla, pero por otra razón: `studio.h` no existe. La librería correcta es `stdio.h` ("standard input/output"). Un simple error de tipeo puede tirar abajo la compilación entera.
+
+Y un tercero, con varios errores juntos:
+
+```c
+#include <stdio.h>
+
+int main(void)
+{
+    name = get_string("What's your name? ")
+    printf("hello, world\n");
+}
+```
+
+Acá hay cuatro problemas al mismo tiempo:
+
+- Falta `#include <cs50.h>` (que es donde vive `get_string`).
+- `name` no tiene tipo declarado.
+- Falta el punto y coma al final de la línea.
+- El `printf` ni siquiera usa la variable `name`.
+
+El compilador te va a señalar estos errores. Pero mientras más errores haya juntos, más importante es corregirlos de a uno, y volver a compilar después de cada corrección, en vez de intentar arreglar todo a la vez.
+
+## Errores que no avisan: el error lógico
+
+Este programa compila y corre sin ningún problema:
+
+```c
+#include <stdio.h>
+
+int main(void)
+{
+    for (int i = 0; i <= 3; i++)
+    {
+        printf("#\n");
+    }
+}
+```
+
+La intención era imprimir tres símbolos `#`. Pero si lo ejecutás, imprime **cuatro**. No hay ningún mensaje de error. El programa "funciona", solo que no hace lo que vos querías.
+
+Este tipo de error es el más traicionero, porque no hay ningún cartel rojo avisándote. Tenés que darte cuenta vos.
+
+## Herramienta 1: usar `printf` para espiar tu código
+
+Una forma muy simple de investigar qué está pasando adentro de un bucle es imprimir el valor de las variables en cada vuelta:
+
+```c
+#include <stdio.h>
+
+int main(void)
+{
+    for (int i = 0; i <= 3; i++)
+    {
+        printf("i is %i\n", i);
+        printf("#\n");
+    }
+}
+```
+
+Al correrlo, vas a ver `i is 0`, `i is 1`, `i is 2` y `i is 3`. Ahí está la pista: el bucle está corriendo una vuelta de más, porque la condición es `i <= 3` en vez de `i < 3`.
+
+Corregido, el programa queda así:
+
+```c
+#include <stdio.h>
+
+int main(void)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        printf("#\n");
+    }
+}
+```
+
+💡 **Idea clave:** cuando algo no funciona como esperás, imprimir el valor de tus variables paso a paso suele ser la forma más rápida de encontrar dónde se rompió tu razonamiento.
+
+## Herramienta 2: el depurador (`debug50`)
+
+Agregar `printf` por todos lados funciona, pero tiene un costo: después hay que acordarse de borrar esas líneas. Existe una herramienta pensada específicamente para esto: el **depurador**.
+
+En VS Code se llama `debug50`, y funciona así:
+
+1. Hacés clic a la izquierda del número de una línea. Aparece un punto rojo: eso es un **breakpoint** (punto de interrupción). Es como poner un cartel de "pare" en esa línea.
+2. Corrés `debug50 ./tu_programa`.
+3. El programa se detiene justo en esa línea, y podés ver, en tiempo real, el valor de cada variable en ese momento exacto.
+4. Con el botón *step over* avanzás instrucción por instrucción, viendo cómo cambian los valores.
+
+El depurador no te va a señalar dónde está el bug con una flecha. Lo que hace es dejarte **mirar tu programa en cámara lenta**, para que vos puedas notar en qué momento algo deja de tener sentido.
+
+## Herramienta 3: hablar del problema en voz alta
+
+Suena extraño, pero funciona: explicarle tu código a otra persona (o incluso a un objeto, como un patito de goma) te obliga a poner en palabras cada paso de tu razonamiento. Muchas veces, el error aparece solo mientras lo estás explicando, antes de que la otra persona diga una sola palabra. A esta técnica se la conoce como **rubber duck debugging**.
+
+## Resumen
+
+Depurar no es una tarea aparte de programar: es parte de programar. Tenés tres herramientas principales:
+
+| Herramienta | Cuándo usarla |
+|---|---|
+| Leer el mensaje del compilador | Cuando el programa ni siquiera compila |
+| `printf` para espiar variables | Cuando querés una pista rápida sobre un bucle o condición |
+| Depurador (`debug50`) | Cuando necesitás ver, paso a paso, el estado completo del programa |
+| Explicarlo en voz alta | Cuando ya probaste todo lo anterior y seguís sin encontrarlo |
+
+## ¿Qué deberías haber entendido?
+
+- ¿Cuál es la diferencia entre un error que el compilador señala y un error lógico?
+- ¿Por qué agregar `printf` dentro de un bucle puede ayudarte a encontrar un bug?
+- ¿Qué hace un breakpoint?
+- ¿Por qué explicar el problema en voz alta puede ayudarte a resolverlo?
+
+## Transición
+
+Ya sabés qué hacer cuando tu código falla. Pero para depurar bien, ayuda entender qué le pasa a tu código *antes* de que lo puedas ejecutar. ¿Qué hace exactamente la computadora entre que escribís `printf("hello, world\n");` y que ves ese texto en pantalla?
+
+---
+
+# Capítulo 2 — Cómo tu código se convierte en algo ejecutable
+
+## ¿Qué problema resuelve?
+
+Vos escribís en C. La computadora, en el fondo, solo entiende ceros y unos. Alguien tiene que traducir un lenguaje al otro. Ese traductor es el **compilador**.
+
+## Idea clave
+
+Compilar no es un solo paso, son cuatro:
+
+```
+Código fuente
+     ↓
+1. Preprocesamiento
+     ↓
+2. Compilación
+     ↓
+3. Ensamblado
+     ↓
+4. Enlazado
+     ↓
+Programa ejecutable
+```
+
+### 1. Preprocesamiento
+
+Cada línea que empieza con `#`, como `#include <cs50.h>`, es una instrucción para el *preprocesador*. Lo que hace es literalmente copiar y pegar el contenido de esa librería dentro de tu archivo, antes de seguir. Por eso, después de este paso, tu programa "conoce" funciones como `get_string` o `printf`, aunque vos nunca escribiste su código.
+
+### 2. Compilación
+
+Tu código en C se traduce a **lenguaje ensamblador**, un paso intermedio mucho más cercano al hardware, pero todavía legible por una persona entrenada. No necesitás entender ese código, solo saber que existe como paso intermedio.
+
+### 3. Ensamblado
+
+El lenguaje ensamblador se convierte en **código máquina**: puro binario. Esto sí es, literalmente, lo único que el procesador puede ejecutar.
+
+### 4. Enlazado
+
+Tu programa usa funciones que vos no escribiste (`printf`, `get_string`). El paso de enlazado toma el código máquina ya compilado de esas librerías y lo combina con el tuyo, para producir un único archivo ejecutable.
+
+## Viéndolo en la práctica
+
+En CS50, el compilador que usás se llama `clang`. Podés invocarlo directamente:
+
+```bash
+clang -o hello hello.c
+```
+
+Esto le dice: "generá un ejecutable llamado `hello` (`-o hello`) a partir de `hello.c`". Si tu programa usa `cs50.h`, necesitás agregar esa librería explícitamente:
+
+```bash
+clang -o hello hello.c -lcs50
+```
+
+Escribir esto cada vez es tedioso. Por eso en CS50 usás:
+
+```bash
+make hello
+```
+
+`make` simplemente ejecuta `clang` por vos, con todas las opciones correctas ya configuradas. No es magia ni un comando distinto a compilar: es un atajo.
+
+## Resumen
+
+Compilar no es un paso mágico ni instantáneo. Es una traducción en cuatro etapas: tu código se copia y expande (preprocesamiento), se traduce a ensamblador (compilación), se convierte a binario (ensamblado) y finalmente se combina con las librerías que usaste (enlazado). El resultado es el archivo que después ejecutás con `./programa`.
+
+## ¿Qué deberías haber entendido?
+
+- ¿Qué hace el preprocesador con las líneas que empiezan con `#`?
+- ¿Por qué tu programa necesita el paso de enlazado si usa `printf`?
+- ¿Qué diferencia hay entre escribir `clang -o hello hello.c` y escribir `make hello`?
+
+## Transición
+
+Ya sabés cómo se traduce tu código y cómo encontrar errores en él. Ahora es momento de resolver el segundo problema de esta semana: ¿cómo guardás muchos valores parecidos sin tener que inventar un nombre de variable para cada uno?
+
+---
+
+# Capítulo 3 — Arreglos (arrays)
+
+## ¿Qué problema resuelven?
+
+Imaginate que querés guardar tres notas de examen y calcular el promedio:
+
+```c
+#include <stdio.h>
+
+int main(void)
+{
+    int score1 = 72;
+    int score2 = 73;
+    int score3 = 33;
+
+    printf("Average: %f\n", (score1 + score2 + score3) / 3.0);
+}
+```
+
+Funciona. Pero ahora imaginate que en vez de tres notas, tenés que guardar treinta. ¿Ibas a escribir `score1`, `score2`... hasta `score30`? Claramente hace falta otra forma de organizar esta información.
+
+## Idea clave
+
+Un **arreglo** es un conjunto de valores del mismo tipo, guardados uno al lado del otro en la memoria de la computadora, bajo un único nombre.
+
+En vez de treinta variables sueltas, tenés una sola caja con treinta compartimentos numerados.
+
+## Cómo se ve en código
+
+```c
+int scores[3];
+```
+
+Esta línea le pide a la computadora tres espacios seguidos en memoria, del tamaño de un `int` cada uno, todos bajo el nombre `scores`.
+
+Para guardar valores, se usa el número de posición, llamado **índice**. Y ojo: **el primer elemento es el índice 0**, no el 1.
+
+```c
+scores[0] = 72;
+scores[1] = 73;
+scores[2] = 33;
+
+printf("Average: %f\n", (scores[0] + scores[1] + scores[2]) / 3.0);
+```
+
+## Combinando arreglos con bucles
+
+Acá está la verdadera ventaja de los arreglos: como los índices son números, podés recorrerlos con un `for`.
+
+```c
+#include <cs50.h>
+#include <stdio.h>
+
+int main(void)
+{
+    int scores[3];
+
+    for (int i = 0; i < 3; i++)
+    {
+        scores[i] = get_int("Score: ");
+    }
+
+    printf("Average: %f\n", (scores[0] + scores[1] + scores[2]) / 3.0);
+}
+```
+
+Ahora, sin importar si tuvieras 3 notas o 300, el bucle sabe cómo cargarlas todas: usando `i` como índice.
+
+## Pasando arreglos a funciones
+
+Los arreglos también se pueden mandar como parámetro a una función, lo que te permite abstraer una tarea (como calcular un promedio) en un solo lugar reutilizable:
+
+```c
+#include <cs50.h>
+#include <stdio.h>
+
+const int N = 3;
+
+float average(int length, int array[]);
+
+int main(void)
+{
+    int scores[N];
+
+    for (int i = 0; i < N; i++)
+    {
+        scores[i] = get_int("Score: ");
+    }
+
+    printf("Average: %f\n", average(N, scores));
+}
+
+float average(int length, int array[])
+{
+    int sum = 0;
+
+    for (int i = 0; i < length; i++)
+    {
+        sum += array[i];
+    }
+
+    return sum / (float) length;
+}
+```
+
+Notá el prototipo, `float average(int length, int array[]);`. Esto ya lo conocés del final de la Parte I: le avisa al compilador que la función `average` existe, antes de mostrar cómo funciona.
+
+## Resumen
+
+Un arreglo te permite guardar muchos valores del mismo tipo bajo un solo nombre, accediendo a cada uno por su posición (empezando en 0). Combinado con un `for`, podés cargar, recorrer o procesar cualquier cantidad de datos sin escribir una línea de código por cada uno. Y como cualquier otro dato, un arreglo se puede pasar como parámetro a una función.
+
+## ¿Qué deberías haber entendido?
+
+- ¿Por qué `scores[0]` corresponde al primer elemento y no `scores[1]`?
+- ¿Qué ventaja tiene un arreglo frente a usar `score1`, `score2`, `score3`?
+- ¿Por qué combinar un arreglo con un `for` es tan útil?
+
+## Transición
+
+Ya sabés guardar muchos números juntos. Pero, ¿qué pasa cuando lo que querés guardar no son números, sino letras? Ahí es donde los arreglos se convierten en algo que ya usaste todo este tiempo sin saberlo: una **cadena de texto**.
+
+---
+
+# Capítulo 4 — Cadenas de texto (strings)
+
+## ¿Qué problema resuelven?
+
+Hasta ahora tratabas a `string` como un tipo de dato más, parecido a `int` o `float`. En realidad, un `string` **es** un arreglo: un arreglo de valores tipo `char`.
+
+## Idea clave
+
+Un string es, literalmente, un arreglo de caracteres, uno detrás del otro en memoria, terminado siempre por un carácter especial llamado **NUL** (se escribe `'\0'`, con una sola L — distinto de `NULL`, con dos).
+
+Ese carácter NUL le dice al programa: "acá termina la palabra".
+
+## Viéndolo carácter por carácter
+
+```c
+#include <stdio.h>
+
+int main(void)
+{
+    char c1 = 'H';
+    char c2 = 'I';
+    char c3 = '!';
+
+    printf("%c%c%c\n", c1, c2, c3);
+}
+```
+
+Esto imprime `HI!`. Tres variables `char`, una al lado de la otra.
+
+Ahora, la versión con string:
+
+```c
+#include <cs50.h>
+#include <stdio.h>
+
+int main(void)
+{
+    string s = "HI!";
+    printf("%c%c%c\n", s[0], s[1], s[2]);
+}
+```
+
+`s[0]`, `s[1]` y `s[2]` acceden a cada letra individual, exactamente igual que accedías a `scores[0]` en el capítulo anterior. La única diferencia es que un string guarda un carácter invisible al final:
+
+```c
+printf("%i %i %i %i\n", s[0], s[1], s[2], s[3]);
+```
+
+Este código imprime los códigos ASCII de `H`, `I`, `!` y, en la posición 3, el del carácter NUL (valor 0).
+
+## Arreglos de strings
+
+Así como un arreglo puede guardar varios números, también puede guardar varias palabras:
+
+```c
+#include <cs50.h>
+#include <stdio.h>
+
+int main(void)
+{
+    string words[2];
+
+    words[0] = "HI!";
+    words[1] = "BYE!";
+
+    printf("%s\n", words[0]);
+    printf("%s\n", words[1]);
+}
+```
+
+Y como cada palabra es a su vez un arreglo de caracteres, podés indexar dos veces: primero la palabra, después la letra dentro de esa palabra (`words[0][0]` es la primera letra de la primera palabra).
+
+## Resumen
+
+Un `string` no es un tipo de dato mágico y aparte: es un arreglo de `char`, terminado por el carácter NUL. Todo lo que ya sabés sobre arreglos (índices desde 0, recorrerlos con `for`) aplica exactamente igual a las cadenas de texto.
+
+## ¿Qué deberías haber entendido?
+
+- ¿Por qué se dice que un string "es" un arreglo?
+- ¿Para qué sirve el carácter NUL?
+- ¿Qué diferencia hay entre `s[0]` y `words[0]`?
+
+## Transición
+
+Si un string es un arreglo que termina en NUL... ¿cómo hace la computadora para saber cuántas letras tiene una palabra, si vos nunca se lo dijiste explícitamente?
+
+---
+
+# Capítulo 5 — La longitud de una cadena
+
+## ¿Qué problema resuelve?
+
+Necesitás saber cuántos caracteres tiene una palabra (por ejemplo, para recorrerla toda con un `for`), pero nunca guardaste ese número en ningún lado.
+
+## Idea clave
+
+Como sabés que todo string termina en `'\0'`, podés recorrerlo carácter por carácter hasta encontrar ese final, y contar cuántos pasos diste.
+
+```c
+#include <cs50.h>
+#include <stdio.h>
+
+int main(void)
+{
+    string name = get_string("Name: ");
+
+    int n = 0;
+    while (name[n] != '\0')
+    {
+        n++;
+    }
+
+    printf("%i\n", n);
+}
+```
+
+Este `while` no tiene un número fijo de vueltas: sigue mientras el carácter actual no sea NUL. En cuanto lo encuentra, se detiene, y `n` guarda exactamente cuántas letras había.
+
+## No hace falta reinventarlo
+
+Este problema es tan común que ya existe una función lista para usar, dentro de la librería `string.h`, llamada `strlen` ("string length"):
+
+```c
+#include <cs50.h>
+#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    string name = get_string("Name: ");
+    int length = strlen(name);
+    printf("%i\n", length);
+}
+```
+
+💡 **Idea clave:** no necesitás escribir de nuevo cada herramienta que te hace falta. Gran parte de programar es saber qué librería ya resolvió el problema que estás por resolver vos.
+
+## Otra librería útil: `ctype.h`
+
+Otra tarea común es transformar mayúsculas y minúsculas. `ctype.h` trae funciones como `toupper` e `islower`, que evitan que tengas que calcular vos mismo el código ASCII de cada letra:
+
+```c
+#include <cs50.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    string s = get_string("Before: ");
+    printf("After:  ");
+
+    for (int i = 0, n = strlen(s); i < n; i++)
+    {
+        printf("%c", toupper(s[i]));
+    }
+
+    printf("\n");
+}
+```
+
+Fijate el detalle: `n = strlen(s)` se calcula **una sola vez**, antes de empezar el bucle, en vez de llamar a `strlen` en cada vuelta. Es una buena costumbre para no recalcular algo que ya sabés.
+
+## Resumen
+
+Para conocer la longitud de un string podés recorrerlo vos mismo hasta encontrar el NUL, o usar `strlen()` de la librería `string.h`, que ya hace exactamente eso. De la misma forma, `ctype.h` te da funciones ya hechas para trabajar con mayúsculas y minúsculas, en vez de que calcules el ASCII a mano.
+
+## ¿Qué deberías haber entendido?
+
+- ¿Cómo sabe un `while` cuándo dejar de recorrer un string?
+- ¿Qué hace `strlen()` y por qué no hace falta escribirla vos mismo?
+- ¿Por qué conviene guardar `strlen(s)` en una variable antes del `for`, en vez de llamarlo en cada vuelta?
+
+## Transición
+
+Hasta ahora, toda la información que le pedías al usuario se la pedías **durante** la ejecución del programa, con `get_string`. Pero hay otra forma de darle información a un programa: antes incluso de que empiece a correr.
+
+---
+
+# Capítulo 6 — Argumentos de línea de comandos
+
+## ¿Qué problema resuelven?
+
+Cuando ejecutás un programa escribiendo `./saludo`, en realidad le podés pasar información justo ahí, en la misma línea. Eso es un **argumento de línea de comandos**.
+
+## Idea clave
+
+`main` puede recibir dos parámetros especiales:
+
+```c
+int main(int argc, string argv[])
+```
+
+- `argv` (*argument vector*) es un arreglo de strings: cada palabra que escribiste después del nombre del programa.
+- `argc` (*argument count*) es cuántos elementos tiene ese arreglo.
+
+`argv[0]` siempre es el nombre del programa. Los argumentos que vos escribiste empiezan en `argv[1]`.
+
+## Un ejemplo
+
+```c
+#include <cs50.h>
+#include <stdio.h>
+
+int main(int argc, string argv[])
+{
+    if (argc == 2)
+    {
+        printf("hello, %s\n", argv[1]);
+    }
+    else
+    {
+        printf("hello, world\n");
+    }
+}
+```
+
+Si ejecutás `./saludo David`, `argc` vale 2 (el nombre del programa más "David"), y el programa imprime `hello, David`. Si lo corrés sin nada más, `argc` vale 1, y cae al `else`.
+
+También podés recorrer todos los argumentos con un `for`, como cualquier otro arreglo:
+
+```c
+for (int i = 0; i < argc; i++)
+{
+    printf("%s\n", argv[i]);
+}
+```
+
+## Resumen
+
+Un programa puede recibir información antes incluso de empezar a correr, a través de `argc` y `argv`. `argv` es un arreglo de strings con cada palabra escrita en la terminal, y `argc` te dice cuántas hay, incluyendo el nombre del programa en la posición 0.
+
+## ¿Qué deberías haber entendido?
+
+- ¿Qué diferencia hay entre `get_string` y un argumento de línea de comandos?
+- ¿Por qué `argv[0]` no es el primer argumento que vos escribiste?
+
+## Transición
+
+Ya sabés cómo entra información a tu programa antes de que corra. Para cerrar la semana, falta ver qué información deja tu programa cuando termina.
+
+---
+
+# Capítulo 7 — Código de salida (exit status)
+
+## ¿Qué problema resuelve?
+
+Cuando un programa termina, no solo desaparece: le deja un mensaje a la computadora sobre cómo terminó. Ese mensaje es un número, llamado **código de salida**.
+
+## Idea clave
+
+- `0` significa que el programa terminó sin errores.
+- Cualquier otro número (por convención, `1`) significa que algo salió mal.
+
+```c
+#include <cs50.h>
+#include <stdio.h>
+
+int main(int argc, string argv[])
+{
+    if (argc != 2)
+    {
+        printf("Missing command-line argument\n");
+        return 1;
+    }
+
+    printf("hello, %s\n", argv[1]);
+    return 0;
+}
+```
+
+Si corrés el programa sin argumentos, termina con código `1`. Si lo corrés con un argumento (`./status David`), termina con código `0`.
+
+Podés ver el código de salida del último programa que corriste escribiendo, justo después, en la terminal:
+
+```bash
+echo $?
+```
+
+## Resumen
+
+`return` dentro de `main` no solo termina el programa: también le informa a la computadora cómo terminó. `0` es el código universal para "todo salió bien"; cualquier otro valor indica que hubo un problema.
+
+## ¿Qué deberías haber entendido?
+
+- ¿Qué significa que un programa termine con código `0`?
+- ¿Para qué le serviría a otro programa (o a vos) saber el código de salida de tu programa?
+
+---
+
+# Cierre de la semana
+
+Esta semana resolviste dos problemas grandes. Primero, aprendiste a encontrar errores en tu código, tanto los que el compilador te señala como los silenciosos. Después, entendiste qué le pasa a tu código entre que lo escribís y que lo ejecutás. Y con esa base, incorporaste una herramienta que vas a usar todo el resto del libro: el arreglo, junto con su caso más común, el string.
+
+## Resumen de la semana 2
+
+| Tema | ¿Qué aprendiste? | Ejemplo |
+|---|---|---|
+| **Errores de compilación** | Reconocer errores que el compilador señala directamente. | `#include` faltante, librería mal escrita |
+| **Errores lógicos** | Reconocer errores que no muestran mensaje, pero dan resultado incorrecto. | Bucle con `<=` en vez de `<` |
+| **Depurar con `printf`** | Imprimir variables para entender qué pasa dentro de un bucle. | `printf("i is %i\n", i);` |
+| **Depurador (`debug50`)** | Pausar el programa y ver sus variables paso a paso. | Breakpoints |
+| **Compilación** | Las cuatro etapas que traducen tu código a binario. | Preprocesamiento → compilación → ensamblado → enlazado |
+| **`make` vs `clang`** | `make` ejecuta `clang` con las opciones correctas por vos. | `make hello` |
+| **Arreglos** | Guardar varios valores del mismo tipo bajo un solo nombre. | `int scores[3];` |
+| **Índices** | Acceder a cada posición de un arreglo, empezando en 0. | `scores[0]` |
+| **Arreglos + funciones** | Pasar un arreglo completo como parámetro. | `float average(int length, int array[])` |
+| **Strings como arreglos** | Un string es un arreglo de `char` terminado en NUL. | `s[0]`, `'\0'` |
+| **Longitud de un string** | Contar caracteres hasta encontrar el NUL. | `strlen(s)` |
+| **`ctype.h`** | Funciones ya hechas para mayúsculas/minúsculas. | `toupper()`, `islower()` |
+| **Argumentos de línea de comandos** | Pasarle información a un programa antes de ejecutarlo. | `int main(int argc, string argv[])` |
+| **Código de salida** | El número que un programa devuelve al terminar. | `return 0;`, `return 1;` |
+
+## En este momento ya sos capaz de...
+
+✅ Reconocer la diferencia entre un error de compilación y un error lógico.
+
+✅ Usar `printf` y el depurador para encontrar bugs en tu código.
+
+✅ Explicar, a grandes rasgos, qué pasa entre escribir código y ejecutar un programa.
+
+✅ Guardar y recorrer varios valores relacionados usando un arreglo.
+
+✅ Pasar un arreglo como parámetro de una función.
+
+✅ Entender por qué un string es, en el fondo, un arreglo de caracteres.
+
+✅ Calcular la longitud de una cadena, a mano o con `strlen()`.
+
+✅ Leer y usar argumentos de línea de comandos (`argc`, `argv`).
+
+✅ Entender qué significa el código de salida de un programa.
